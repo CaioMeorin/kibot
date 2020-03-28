@@ -7,13 +7,14 @@ from src.baixar import baixar
 def main():
 
     while True:
-        print()
+        print(Fore.RESET)
         url = input("Cole o link que deseja procurar por imagens: ")
         if "facebook" in url:
             print("facebook ainda não implementado")
             continue
         elif url == '':
             print('Encerrando tarefa')
+            break
 
         else:
             print()

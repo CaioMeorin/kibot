@@ -16,12 +16,18 @@ def twitter(driver,n):
 
     directory = 'imagens\\twitter\\'
     pre = 'Twitter '
+    content = ''
 
+    if path.exists('src\\src.txt'):
+        with open('src\\src.txt', 'r') as f:
+            content = f.readlines()
+    
+    
     if not path.exists(directory):
         subprocess.run(['mkdir', directory], shell =True)
 
-    for i in range(int(n)):
-
+    while True:
+        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
         driver.execute_script("window.scrollBy(0,720)")
@@ -31,6 +37,20 @@ def twitter(driver,n):
         # grab todas as imagens de post
         imgs = soup.find_all("img", attrs={"alt":"Imagem"})
 
+        if len(imgs) >= n:
+            if content:
+                for img in imgs:
+                    if img['src']+'\n' in content:
+                        print(Fore.RED+"Excluindo imagem já baixada, de acordo com src.txt")
+                        imgs.remove(img)
+                
+            imgs = imgs[0:n]
+            
+            if len(imgs) == n:
+                break
+            else:
+                continue
+
     return (imgs, directory, pre)
 
 def reddit(driver, n):
@@ -38,12 +58,18 @@ def reddit(driver, n):
 
     directory = 'imagens\\reddit\\'
     pre = 'Reddit '
+    content = ''
 
+    if path.exists('src\\src.txt'):
+        with open('src\\src.txt', 'r') as f:
+            content = f.readlines()
+    
+  
     if not path.exists(directory):
         subprocess.run(['mkdir', directory], shell =True)
 
-    for i in range(int(n)):
-
+    while True:
+        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
         driver.execute_script("window.scrollBy(0,720)")
@@ -53,6 +79,19 @@ def reddit(driver, n):
         # grab todas as imagens de post
         imgs = soup.find_all("img", attrs={"alt":"Post image"})
 
+        if len(imgs) >= n:
+            if content:
+                for img in imgs:
+                    if img['src'] + '\n' in content or "small" in img['src']:
+                        print(Fore.RED+"Excluindo: imagem já baixada ou muito pequena")
+                        imgs.remove(img)
+            
+            if len(imgs) == n:
+                break
+
+            else:
+                continue
+
     return (imgs, directory, pre)
 
 def facebook(driver, n):
@@ -60,12 +99,17 @@ def facebook(driver, n):
 
     directory = 'imagens\\facebook\\'
     pre = 'facebook '
+    content = ''
+
+    if path.exists('src\\src.txt'):
+        with open('src\\src.txt', 'r') as f:
+            content = f.readlines()
 
     if not path.exists(directory):
         subprocess.run(['mkdir', directory], shell =True)
     
-    for i in range(int(n)):
-
+    while True:
+        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
         driver.execute_script("window.scrollBy(0,720)")
@@ -75,6 +119,20 @@ def facebook(driver, n):
         # grab todas as imagens de post
         imgs = soup.find_all("img", {"class":"img"})
 
+        if len(imgs) >= n:
+            if content:
+                for img in imgs:
+                    if img['src']+'\n' in content:
+                        print(Fore.RED+"Excluindo imagem já baixada, de acordo com src.txt")
+                        imgs.remove(img)
+                
+            imgs = imgs[0:n]
+            
+            if len(imgs) == n:
+                break
+            else:
+                continue
+
     return (imgs, directory, pre)
 
 def baixar(driver, url):
@@ -83,7 +141,7 @@ def baixar(driver, url):
     if not path.exists("imagens"):
         subprocess.run(['mkdir', 'imagens'], shell =True)
 
-    n = input("Quantos ciclos? (0-10 imagens por ciclo): ")
+    n = int(input("Quantas imagens deseja baixar? "))
 
     print(Fore.CYAN + 'Baixando imagens\n')
 
@@ -104,22 +162,16 @@ def baixar(driver, url):
     if path.exists('src\\src.txt'):
         
 
-        with open('src\\src.txt', 'r') as r:
-            content = r.readlines()
-
         with open('src\\src.txt', 'a') as f:
 
             for img in imgs:
                 num = randint(100000, 999999)
                 
                 img = img['src']
+                urllib.request.urlretrieve(img, directory + pre + "Imagem "+ str(num) + ".png")
+                f.write(f"{img}\n")
+                time.sleep(1)
 
-                if img+'\n' in content:
-                    print(Fore.YELLOW + f"Imagem encontrada já baixada anteriormente, ignorando (link da imagem: "+ Fore.MAGENTA + f"{img}")
-                else:
-                    
-                    urllib.request.urlretrieve(img, directory + pre + "Imagem "+ str(num) + ".png")
-                    f.write(f"{img}\n")
     else:
 
         with open('src\\src.txt', 'w') as f:
@@ -128,6 +180,7 @@ def baixar(driver, url):
                 img = img['src']
                 urllib.request.urlretrieve(img, directory + pre + "Imagem " + str(num)+ ".png")
                 f.write(f"{img}\n")
+                time.sleep(1)
 
     print()
     print(Fore.RED + 'Finalizado...')
