@@ -29,6 +29,5 @@ def iniciar(url):
     driver.get(url)
     print(Fore.GREEN + 'Pronto para começar\n'+ Fore.LIGHTBLUE_EX)
     #pausando por 5s pra ter certeza que o get() foi concluido
-    time.sleep(2)
 
     return driver

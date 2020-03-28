@@ -27,29 +27,33 @@ def twitter(driver,n):
         subprocess.run(['mkdir', directory], shell =True)
 
     while True:
-        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
-        driver.execute_script("window.scrollBy(0,720)")
-        #usando lxml de parser, criando a sopa
+
         soup = BeautifulSoup(page, 'lxml')
-
-        # grab todas as imagens de post
         imgs = soup.find_all("img", attrs={"alt":"Imagem"})
+        # grab todas as imagens de post
 
-        if len(imgs) >= n:
+        if len(imgs) < n:
+            
+            driver.execute_script("window.scrollBy(0,1080)")
+            continue
+
+        else:
             if content:
                 for img in imgs:
                     if img['src']+'\n' in content:
-                        print(Fore.RED+"Excluindo imagem já baixada, de acordo com src.txt")
+                        print(Fore.RED+"Imagem ja baixada detectada, tentando evita-la")
                         imgs.remove(img)
                 
+                    if "small" in img['src']:
+                        imgs.remove(img)
+            
             imgs = imgs[0:n]
             
-            if len(imgs) == n:
-                break
-            else:
-                continue
+        if len(imgs) == n:
+            break
+
 
     return (imgs, directory, pre)
 
@@ -69,28 +73,34 @@ def reddit(driver, n):
         subprocess.run(['mkdir', directory], shell =True)
 
     while True:
-        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
-        driver.execute_script("window.scrollBy(0,720)")
         #usando lxml de parser, criando a sopa
         soup = BeautifulSoup(page, 'lxml')
 
         # grab todas as imagens de post
         imgs = soup.find_all("img", attrs={"alt":"Post image"})
 
-        if len(imgs) >= n:
+        if len(imgs) < n:
+            
+            driver.execute_script("window.scrollBy(0,1080")
+            continue
+
+        else:
             if content:
                 for img in imgs:
-                    if img['src'] + '\n' in content or "small" in img['src']:
-                        print(Fore.RED+"Excluindo: imagem já baixada ou muito pequena")
+                    if img['src']+'\n' in content:
+                        print(Fore.RED+"Imagem ja baixada detectada, tentando evita-la")
+                        imgs.remove(img)
+                
+                    if "small" in img['src']:
                         imgs.remove(img)
             
-            if len(imgs) == n:
-                break
+            imgs = imgs[0:n]
+            
+        if len(imgs) == n:
+            break
 
-            else:
-                continue
 
     return (imgs, directory, pre)
 
@@ -109,7 +119,6 @@ def facebook(driver, n):
         subprocess.run(['mkdir', directory], shell =True)
     
     while True:
-        time.sleep(1)
         #pegando o source da pagina
         page = driver.page_source
         driver.execute_script("window.scrollBy(0,720)")
@@ -123,7 +132,7 @@ def facebook(driver, n):
             if content:
                 for img in imgs:
                     if img['src']+'\n' in content:
-                        print(Fore.RED+"Excluindo imagem já baixada, de acordo com src.txt")
+                        print(Fore.RED+"Imagem ja baixada detectada, tentando evita-la")
                         imgs.remove(img)
                 
             imgs = imgs[0:n]
@@ -142,50 +151,54 @@ def baixar(driver, url):
         subprocess.run(['mkdir', 'imagens'], shell =True)
 
     n = int(input("Quantas imagens deseja baixar? "))
-
-    print(Fore.CYAN + 'Baixando imagens\n')
-
-
-    if "reddit" in url:
-        imgs, directory, pre = reddit(driver, n)
-
-    elif "facebook" in url:
-        pass
-        #imgs, directory, pre = facebook(driver, n)
-
-    elif "twitter" in url:
-        imgs, directory, pre = twitter(driver , n)
-
-        
+    if n in range(1,11):
+        print(Fore.CYAN + 'Baixando imagens\n')
 
 
-    if path.exists('src\\src.txt'):
-        
+        if "reddit" in url:
+            imgs, directory, pre = reddit(driver, n)
 
-        with open('src\\src.txt', 'a') as f:
+        elif "facebook" in url:
+            pass
+            #imgs, directory, pre = facebook(driver, n)
 
-            for img in imgs:
-                num = randint(100000, 999999)
-                
-                img = img['src']
-                urllib.request.urlretrieve(img, directory + pre + "Imagem "+ str(num) + ".png")
-                f.write(f"{img}\n")
-                time.sleep(1)
+        elif "twitter" in url:
+            imgs, directory, pre = twitter(driver , n)
 
+            
+
+
+        if path.exists('src\\src.txt'):
+            
+
+            with open('src\\src.txt', 'a') as f:
+
+                for img in imgs:
+                    num = randint(100000, 999999)
+                    
+                    img = img['src']
+                    urllib.request.urlretrieve(img, directory + pre + "Imagem "+ str(num) + ".png")
+                    f.write(f"{img}\n")
+
+
+        else:
+
+            with open('src\\src.txt', 'w') as f:
+                for img in imgs:
+                    num = randint(100000, 999999)
+                    img = img['src']
+                    urllib.request.urlretrieve(img, directory + pre + "Imagem " + str(num)+ ".png")
+                    f.write(f"{img}\n")
+
+
+        print()
+        print(Fore.RED + 'Finalizado...')
+        time.sleep(3)
+
+
+        #encerrando o script
+
+        driver.quit()
     else:
-
-        with open('src\\src.txt', 'w') as f:
-            for img in imgs:
-                num = randint(100000, 999999)
-                img = img['src']
-                urllib.request.urlretrieve(img, directory + pre + "Imagem " + str(num)+ ".png")
-                f.write(f"{img}\n")
-                time.sleep(1)
-
-    print()
-    print(Fore.RED + 'Finalizado...')
-    time.sleep(1)
-
-
-    #encerrando o script
-    driver.quit()
+        print('Número invalido, escolha entre 1-10')
+        driver.quit()
